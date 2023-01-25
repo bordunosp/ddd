@@ -1,6 +1,9 @@
 package ddd
 
-import "github.com/google/uuid"
+import (
+	"errors"
+	"github.com/google/uuid"
+)
 
 func NewAggregateRoot(id uuid.UUID) IAggregateRoot {
 	return &aggregateRoot{
@@ -22,8 +25,14 @@ func (a *aggregateRoot) UUID() uuid.UUID {
 	return a.id
 }
 
-func (a *aggregateRoot) AddDomainEvent(event IEvent) {
+func (a *aggregateRoot) AddDomainEvent(event IEvent) error {
+	if event.AggregateID() != a.ID() {
+		return errors.New("unexpected AggregateID")
+	}
+
 	a.domainEvents = append(a.domainEvents, event)
+
+	return nil
 }
 
 func (a *aggregateRoot) DomainEvents() []IEvent {

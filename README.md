@@ -3,6 +3,8 @@
 
 ## AggregateRoot
 ```golang
+// src: app/user/domain/user.go
+
 import (
     "github.com/google/uuid"
     "github.com/bordunosp/ddd"
@@ -42,6 +44,8 @@ func NewUser(id uuid.UUID, name, email string) (User, error) {
 
 ## Entity
 ```golang
+// src: app/user/domain/entity/profile.go
+
 import (
     "github.com/google/uuid"
     "github.com/bordunosp/ddd"
@@ -77,4 +81,46 @@ func NewProfile(id, aggregateID uuid.UUID, name, email string) (Profile, error) 
     }
     return profile, nil
 }
+```
+
+## Event
+```golang
+// src: app/user/domain/event/created.go
+
+import (
+    "github.com/google/uuid"
+    "github.com/bordunosp/ddd"
+)
+
+func NewCreatedEvent(userID uuid.UUID) ddd.IEvent {
+    return &createdDomainEvent{
+        userID: userID,
+    }
+}
+
+type createdEvent struct {
+    userID uuid.UUID
+}
+
+func (event createdEvent) Name() string {
+    return "user_created"
+}
+
+func (event createdEvent) AggregateID() uuid.UUID {
+    return event.userID
+}
+```
+
+## Event vs AggregateRoot
+```golang
+user, _ := NewUser(uuid.New(), "name", "email@test.com")
+event := NewCreatedEvent(user.UUID())
+_ := user.AddDomainEvent(event)
+
+// DomainEvents must be executed before the transaction is committed
+
+// 1) open transaction
+// 2) Save user to DB
+// 3) Execute DomainEvents user.DomainEvents()
+// 4) commit transaction 
 ```

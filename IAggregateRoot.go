@@ -5,6 +5,6 @@ import "github.com/google/uuid"
 type IAggregateRoot interface {
 	ID() string
 	UUID() uuid.UUID
-	AddDomainEvent(event IEvent)
+	AddDomainEvent(event IEvent) error
 	DomainEvents() []IEvent
 }
