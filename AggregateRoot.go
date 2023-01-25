@@ -2,24 +2,30 @@ package ddd
 
 import "github.com/google/uuid"
 
-type AggregateRoot struct {
+func NewAggregateRoot(id uuid.UUID) IAggregateRoot {
+	return &aggregateRoot{
+		id: id,
+	}
+}
+
+type aggregateRoot struct {
 	id uuid.UUID
 
 	domainEvents []IEvent
 }
 
-func (a *AggregateRoot) ID() string {
+func (a *aggregateRoot) ID() string {
 	return a.id.String()
 }
 
-func (a *AggregateRoot) UUID() uuid.UUID {
+func (a *aggregateRoot) UUID() uuid.UUID {
 	return a.id
 }
 
-func (a *AggregateRoot) AddDomainEvent(event IEvent) {
+func (a *aggregateRoot) AddDomainEvent(event IEvent) {
 	a.domainEvents = append(a.domainEvents, event)
 }
 
-func (a *AggregateRoot) DomainEvents() []IEvent {
+func (a *aggregateRoot) DomainEvents() []IEvent {
 	return a.domainEvents
 }
