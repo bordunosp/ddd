@@ -1,7 +1,6 @@
 package ddd
 
 import (
-	"errors"
 	"github.com/google/uuid"
 )
 
@@ -14,7 +13,7 @@ func NewAggregateRoot(id uuid.UUID) IAggregateRoot {
 type aggregateRoot struct {
 	id uuid.UUID
 
-	domainEvents []IEvent
+	domainEvents []IDomainEvent
 }
 
 func (a *aggregateRoot) ID() string {
@@ -25,16 +24,10 @@ func (a *aggregateRoot) UUID() uuid.UUID {
 	return a.id
 }
 
-func (a *aggregateRoot) AddDomainEvent(event IEvent) error {
-	if event.AggregateID() != a.ID() {
-		return errors.New("unexpected AggregateID")
-	}
-
+func (a *aggregateRoot) AddDomainEvent(event IDomainEvent) {
 	a.domainEvents = append(a.domainEvents, event)
-
-	return nil
 }
 
-func (a *aggregateRoot) DomainEvents() []IEvent {
+func (a *aggregateRoot) DomainEvents() []IDomainEvent {
 	return a.domainEvents
 }

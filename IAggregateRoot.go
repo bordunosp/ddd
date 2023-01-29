@@ -1,10 +1,13 @@
 package ddd
 
-import "github.com/google/uuid"
+import (
+	"github.com/bordunosp/ddd/CQRS/EventBus"
+	"github.com/google/uuid"
+)
 
 type IAggregateRoot interface {
 	ID() string
 	UUID() uuid.UUID
-	AddDomainEvent(event IEvent) error
-	DomainEvents() []IEvent
+	AddDomainEvent(event EventBus.IEvent)
+	DomainEvents() []EventBus.IEvent
 }
