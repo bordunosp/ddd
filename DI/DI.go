@@ -27,13 +27,13 @@ func RegisterServices(services []ServiceItem) error {
 		}
 
 		if service.IsSingleton {
-			instance, err := service.InitFunc()
+			instance, err := service.ServiceInitFunc()
 			if err != nil {
 				return err
 			}
 			registeredServices[service.ServiceName] = instance
 		} else {
-			registeredServices[service.ServiceName] = service.InitFunc
+			registeredServices[service.ServiceName] = service.ServiceInitFunc
 		}
 	}
 

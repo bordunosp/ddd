@@ -1,6 +1,7 @@
 package ddd
 
 import (
+	"github.com/bordunosp/ddd/CQRS/EventBus"
 	"github.com/google/uuid"
 )
 
@@ -13,7 +14,7 @@ func NewAggregateRoot(id uuid.UUID) IAggregateRoot {
 type aggregateRoot struct {
 	id uuid.UUID
 
-	domainEvents []IDomainEvent
+	domainEvents []EventBus.IEvent
 }
 
 func (a *aggregateRoot) ID() string {
@@ -24,10 +25,10 @@ func (a *aggregateRoot) UUID() uuid.UUID {
 	return a.id
 }
 
-func (a *aggregateRoot) AddDomainEvent(event IDomainEvent) {
+func (a *aggregateRoot) AddDomainEvent(event EventBus.IEvent) {
 	a.domainEvents = append(a.domainEvents, event)
 }
 
-func (a *aggregateRoot) DomainEvents() []IDomainEvent {
+func (a *aggregateRoot) DomainEvents() []EventBus.IEvent {
 	return a.domainEvents
 }
