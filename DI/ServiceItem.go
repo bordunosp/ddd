@@ -1,6 +1,6 @@
 package DI
 
-type ServiceItem struct {
+type ServiceItem[T any] struct {
 	IsSingleton     bool
 	ServiceName     string
 	ServiceInitFunc ServiceInitFunc

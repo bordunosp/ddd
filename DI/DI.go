@@ -1,36 +1,53 @@
 package DI
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
+
+var ErrServiceNotRegistered = errors.New("service not registered")
+var ErrServiceHasIncorrectType = errors.New("service has incorrect type")
+var ErrServiceAlreadyRegistered = errors.New("service already registered")
 
 var registeredServices = make(map[string]any)
 
-func Get(serviceName string) (any, error) {
+func Get[T any](serviceName string, serviceT T) (T, error) {
 	service, ok := registeredServices[serviceName]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("service by name '%s' not registered", serviceName))
+		return serviceT, ErrServiceNotRegistered
 	}
 
 	if diInitFunc, ok := service.(ServiceInitFunc); ok {
-		return diInitFunc()
+		obj, err := diInitFunc()
+		if err != nil {
+			return serviceT, err
+		}
+
+		convertableType, ok := obj.(T)
+		if !ok {
+			return serviceT, ErrServiceHasIncorrectType
+		}
+
+		return convertableType, nil
 	}
 
-	return service, nil
+	convertableType, ok := service.(T)
+	if !ok {
+		return serviceT, ErrServiceHasIncorrectType
+	}
+
+	return convertableType, nil
 }
 
-func RegisterServices(services []ServiceItem) error {
+func RegisterServices(services []ServiceItem[any]) error {
 	for _, service := range services {
 		if _, ok := registeredServices[service.ServiceName]; ok {
-			return errors.New(fmt.Sprintf("service by name '%s' already registered", service.ServiceName))
+			return ErrServiceAlreadyRegistered
+		}
+
+		instance, err := service.ServiceInitFunc()
+		if err != nil {
+			return err
 		}
 
 		if service.IsSingleton {
-			instance, err := service.ServiceInitFunc()
-			if err != nil {
-				return err
-			}
 			registeredServices[service.ServiceName] = instance
 		} else {
 			registeredServices[service.ServiceName] = service.ServiceInitFunc

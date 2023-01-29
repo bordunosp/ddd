@@ -6,5 +6,5 @@ import (
 )
 
 type IUserService interface {
-	SendCreatedEmail(cnt context.Context, userId uuid.UUID) error
+	SendCreatedEmail(ctx context.Context, userId uuid.UUID) error
 }

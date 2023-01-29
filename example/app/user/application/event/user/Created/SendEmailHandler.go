@@ -15,14 +15,10 @@ func SendEmailHandler(ctx context.Context, eventAny EventBus.IEvent) error {
 		return errors.New("Incorrect EventType: " + eventAny.EventName())
 	}
 
-	userServiceAny, err := DI.Get("UserService")
+	var userService domain.IUserService
+	userService, err := DI.Get("UserService", userService)
 	if err != nil {
 		return err
-	}
-
-	userService, ok := userServiceAny.(domain.IUserService)
-	if !ok {
-		return errors.New("incorrect service typy 'UserService'")
 	}
 
 	return userService.SendCreatedEmail(ctx, request.Id)

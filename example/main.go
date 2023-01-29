@@ -16,13 +16,12 @@ import (
 )
 
 func main() {
-	err := DI.RegisterServices([]DI.ServiceItem{
+	err := DI.RegisterServices([]DI.ServiceItem[any]{
 		{
 			// will be initialized immediately (once)
 			IsSingleton: true,
 			ServiceName: "logger",
 			ServiceInitFunc: func() (any, error) {
-				// create new simple logger
 				return log.New(os.Stderr, "\t", log.Ldate|log.Ltime|log.Lshortfile), nil
 			},
 		},
@@ -31,13 +30,15 @@ func main() {
 			IsSingleton: false,
 			ServiceName: "UserService",
 			ServiceInitFunc: func() (any, error) {
-				loggerAny, err := DI.Get("logger")
+				var logger *log.Logger
+
+				logger, err := DI.Get("logger", logger)
 				if err != nil {
 					return nil, err
 				}
 
 				// creating new UserService which use logger from DI
-				return infrastructure.NewUserService(loggerAny.(*log.Logger))
+				return infrastructure.NewUserService(logger)
 			},
 		},
 	})
@@ -82,6 +83,7 @@ func main() {
 
 	// Use service from DI
 	// it can be used anywhere in your project (after registered)
-	loggerAny, _ := DI.Get("logger")
-	loggerAny.(*log.Logger).Println("loggerAny call")
+	var logger *log.Logger
+	logger, _ = DI.Get("logger", logger)
+	logger.Println("loggerAny call")
 }
