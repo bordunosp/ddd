@@ -2,15 +2,16 @@ package CommandBus
 
 import (
 	"errors"
-	"fmt"
 )
+
+var ErrCommandAlreadyRegistered = errors.New("command already registered")
 
 var registeredCommands = make(map[string]ICommandHandler)
 
 func RegisterCommands(commandItems []CommandItem) error {
 	for _, commandItem := range commandItems {
 		if _, ok := registeredCommands[commandItem.CommandName]; ok {
-			return errors.New(fmt.Sprintf("command by name '%s' already registered", commandItem.CommandName))
+			return ErrCommandAlreadyRegistered
 		}
 		registeredCommands[commandItem.CommandName] = commandItem.Handler
 	}
