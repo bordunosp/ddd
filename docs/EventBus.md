@@ -47,10 +47,11 @@ import (
 func SendEmailHandler(ctx context.Context, eventAny EventBus.IEvent) error {
     request, _ := eventAny.(event.UserCreated)
 
-    userServiceAny, err := DI.Get("UserService")
-    if err != nil {
-        return err
-    }
+	var userService domain.IUserService
+	userService, err := DI.Get("UserService", userService)
+	if err != nil {
+		return err
+	}
 
     return userService.SendCreatedEmail(ctx, request.Id)
 }
