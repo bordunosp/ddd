@@ -85,5 +85,5 @@ func main() {
 	// it can be used anywhere in your project (after registered)
 	var logger *log.Logger
 	logger, _ = DI.Get("logger", logger)
-	logger.Println("loggerAny call")
+	logger.Println("logger.Println called")
 }
