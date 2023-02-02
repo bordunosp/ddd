@@ -1,3 +1,6 @@
 
+update:
+	go get -u ./...
+
 test:
 	go test ./...
