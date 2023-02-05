@@ -1,15 +1,20 @@
 package DI
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
 
 var ErrServiceNotRegistered = errors.New("service not registered")
 var ErrServiceHasIncorrectType = errors.New("service has incorrect type")
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
 
-var registeredServices = make(map[string]any)
+var registeredServices = sync.Map{}
 
-func Get[T any](serviceName string, serviceT T) (T, error) {
-	service, ok := registeredServices[serviceName]
+func Get[T any](serviceName string) (T, error) {
+	var serviceT T
+
+	service, ok := registeredServices.Load(serviceName)
 	if !ok {
 		return serviceT, ErrServiceNotRegistered
 	}
@@ -36,21 +41,20 @@ func Get[T any](serviceName string, serviceT T) (T, error) {
 	return convertableType, nil
 }
 
-func RegisterServices(services []ServiceItem[any]) error {
+func RegisterServices(services []ServiceItem) error {
 	for _, service := range services {
-		if _, ok := registeredServices[service.ServiceName]; ok {
+		if _, ok := registeredServices.Load(service.ServiceName); ok {
 			return ErrServiceAlreadyRegistered
 		}
 
-		instance, err := service.ServiceInitFunc()
-		if err != nil {
-			return err
-		}
-
 		if service.IsSingleton {
-			registeredServices[service.ServiceName] = instance
+			instance, err := service.ServiceInitFunc()
+			if err != nil {
+				return err
+			}
+			registeredServices.Store(service.ServiceName, instance)
 		} else {
-			registeredServices[service.ServiceName] = service.ServiceInitFunc
+			registeredServices.Store(service.ServiceName, service.ServiceInitFunc)
 		}
 	}
 

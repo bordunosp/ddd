@@ -8,6 +8,7 @@ import (
 type IAggregateRoot interface {
 	ID() string
 	UUID() uuid.UUID
-	AddDomainEvent(event EventBus.IEvent)
 	DomainEvents() []EventBus.IEvent
+	DomainEventsAdd(event EventBus.IEvent)
+	DomainEventsClear()
 }
