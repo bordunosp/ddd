@@ -8,8 +8,4 @@ type ILogger interface {
 	PanicStack(err error, msg string)
 
 	With(key, val string) ILogger
-
-	AssertErrNotNil(err error, msg string)
-	AssertErrNotNilFatal(err error, msg string)
-	AssertErrNotNilPanic(err error, msg string)
 }
