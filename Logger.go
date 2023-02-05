@@ -73,21 +73,3 @@ func (l *loggerZerolog) FatalStack(err error, msg string) {
 func (l *loggerZerolog) PanicStack(err error, msg string) {
 	l.log.Panic().Stack().Err(errors.WithStack(err)).Msg(msg)
 }
-
-func (l *loggerZerolog) AssertErrNotNil(err error, msg string) {
-	if err != nil {
-		l.ErrorStack(err, msg)
-	}
-}
-
-func (l *loggerZerolog) AssertErrNotNilFatal(err error, msg string) {
-	if err != nil {
-		l.FatalStack(err, msg)
-	}
-}
-
-func (l *loggerZerolog) AssertErrNotNilPanic(err error, msg string) {
-	if err != nil {
-		l.PanicStack(err, msg)
-	}
-}
