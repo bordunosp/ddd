@@ -15,8 +15,7 @@ func SendEmailHandler(ctx context.Context, eventAny EventBus.IEvent) error {
 		return errors.New("Incorrect EventType: " + eventAny.EventName())
 	}
 
-	var userService domain.IUserService
-	userService, err := DI.Get("UserService", userService)
+	userService, err := DI.Get[domain.IUserService]("UserService")
 	if err != nil {
 		return err
 	}

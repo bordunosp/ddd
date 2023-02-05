@@ -25,10 +25,14 @@ func (a *aggregateRoot) UUID() uuid.UUID {
 	return a.id
 }
 
-func (a *aggregateRoot) AddDomainEvent(event EventBus.IEvent) {
+func (a *aggregateRoot) DomainEvents() []EventBus.IEvent {
+	return a.domainEvents
+}
+
+func (a *aggregateRoot) DomainEventsAdd(event EventBus.IEvent) {
 	a.domainEvents = append(a.domainEvents, event)
 }
 
-func (a *aggregateRoot) DomainEvents() []EventBus.IEvent {
-	return a.domainEvents
+func (a *aggregateRoot) DomainEventsClear() {
+	a.domainEvents = []EventBus.IEvent{}
 }
