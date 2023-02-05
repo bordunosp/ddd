@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-    err := DI.RegisterServices([]DI.ServiceItem[any]{
+    err := DI.RegisterServices([]DI.ServiceItem{
         {
             // will be initialized immediately (once)
             IsSingleton: true,
@@ -24,9 +24,7 @@ func main() {
             IsSingleton: false,
             ServiceName: "UserService",
             ServiceInitFunc: func() (any, error) {
-                var logger *log.Logger
-
-                logger, err := DI.Get("logger", logger)
+                logger, err := DI.Get[*log.Logger]("logger")
                 if err != nil {
                     return nil, err
                 }
@@ -43,8 +41,7 @@ func main() {
 
     // Use service from DI
     // it can be used anywhere in your project (after registered)
-    var logger *log.Logger
-    logger, _ = DI.Get("logger", logger)
+    logger, _ := DI.Get[*log.Logger]("logger")
     logger.Println("logger.Println called")
 }
 ```
