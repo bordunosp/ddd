@@ -19,7 +19,7 @@ var registeredServices = struct {
 }
 
 func Get[T any](serviceName string) (T, error) {
-	registeredServices.mu.RLocker()
+	registeredServices.mu.RLock()
 	defer registeredServices.mu.RUnlock()
 
 	var serviceT T
