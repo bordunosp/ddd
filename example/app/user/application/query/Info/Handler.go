@@ -2,18 +2,11 @@ package Info
 
 import (
 	"context"
-	"errors"
-	"github.com/bordunosp/ddd/CQRS/QueryBus"
 	"log"
 )
 
-func Handler(ctx context.Context, queryAny QueryBus.IQuery) (any, error) {
-	request, ok := queryAny.(Query)
-	if !ok {
-		return nil, errors.New("Incorrect QueryType: " + queryAny.QueryName())
-	}
-
-	log.Print(request.Id)
+func Handler(ctx context.Context, query Query) (Response, error) {
+	log.Print(query.Id)
 
 	return NewResponse(
 		"name",

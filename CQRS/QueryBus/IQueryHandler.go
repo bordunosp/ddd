@@ -2,4 +2,4 @@ package QueryBus
 
 import "context"
 
-type IQueryHandler func(ctx context.Context, queryAny IQuery) (any, error)
+type IQueryHandler[T IQuery, K any] func(ctx context.Context, queryAny T) (K, error)

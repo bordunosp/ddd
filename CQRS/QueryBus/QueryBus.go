@@ -4,28 +4,37 @@ import (
 	"context"
 	"errors"
 	"github.com/bordunosp/ddd/CQRS"
+	"sync"
 )
 
 var ErrQueryAlreadyRegistered = errors.New("query already registered")
 var ErrQueryNotRegistered = errors.New("query not registered")
+var ErrQueryHandlerType = errors.New("IQueryHandler has incorrect types")
 
-var registeredQueries = make(map[string]IQueryHandler)
+var registeredQueries = &sync.Map{}
 
-func RegisterQueries(queryItems []QueryItem) error {
+func RegisterQuery[T IQuery, K any](queryItem QueryItem[T, K]) error {
+	if _, ok := registeredQueries.Load(queryItem.QueryName); ok {
+		return ErrQueryAlreadyRegistered
+	}
+	registeredQueries.Store(queryItem.QueryName, queryItem.Handler)
+	return nil
+}
+
+func RegisterQueries[T IQuery, K any](queryItems []QueryItem[T, K]) error {
 	for _, queryItem := range queryItems {
-		if _, ok := registeredQueries[queryItem.QueryName]; ok {
+		if _, ok := registeredQueries.Load(queryItem.QueryName); ok {
 			return ErrQueryAlreadyRegistered
 		}
-		registeredQueries[queryItem.QueryName] = queryItem.Handler
+		registeredQueries.Store(queryItem.QueryName, queryItem.Handler)
 	}
 	return nil
 }
 
-func Handle(ctx context.Context, query IQuery) (value any, err error) {
-	handler, ok := registeredQueries[query.QueryName()]
+func Handle[T IQuery, K any](ctx context.Context, query T) (value K, err error) {
+	handler, ok := registeredQueries.Load(query.QueryName())
 	if !ok {
-		err = ErrQueryNotRegistered
-		return
+		return value, ErrQueryNotRegistered
 	}
 
 	defer func() {
@@ -34,23 +43,28 @@ func Handle(ctx context.Context, query IQuery) (value any, err error) {
 		}
 	}()
 
-	value, err = handler(ctx, query)
+	typedHandler, ok := handler.(IQueryHandler[T, K])
+	if !ok {
+		return value, ErrQueryHandlerType
+	}
+
+	value, err = typedHandler(ctx, query)
 	return
 }
 
-func HandleAsync(ctx context.Context, query IQuery) chan ReplayDTO {
-	replay := make(chan ReplayDTO)
+func HandleAsync[T IQuery, K any](ctx context.Context, query T) chan ReplayDTO[K] {
+	replay := make(chan ReplayDTO[K])
 
-	go func(query IQuery) {
+	go func(query T) {
 		defer close(replay)
-		value, err := Handle(ctx, query)
-		replay <- *&ReplayDTO{Value: value, Err: err}
+		value, err := Handle[T, K](ctx, query)
+		replay <- *&ReplayDTO[K]{Value: value, Err: err}
 	}(query)
 
 	return replay
 }
 
-func HandleAsyncAwait(ctx context.Context, query IQuery) (any, error) {
-	replay := <-HandleAsync(ctx, query)
+func HandleAsyncAwait[T IQuery, K any](ctx context.Context, query T) (K, error) {
+	replay := <-HandleAsync[T, K](ctx, query)
 	return replay.Value, replay.Err
 }

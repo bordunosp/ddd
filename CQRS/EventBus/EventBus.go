@@ -4,24 +4,34 @@ import (
 	"context"
 	"errors"
 	"github.com/bordunosp/ddd/CQRS"
+	"sync"
 )
 
 var ErrEventAlreadyRegistered = errors.New("event already registered")
+var ErrEventHandlerType = errors.New("IEventHandler has incorrect types")
 
-var registeredEvents = make(map[string][]IEventHandler)
+var registeredEvents = &sync.Map{}
 
-func RegisterEvents(eventItems []EventItem) error {
+func RegisterEvent[T IEvent](eventItem EventItem[T]) error {
+	if _, ok := registeredEvents.Load(eventItem.EventName); ok {
+		return ErrEventAlreadyRegistered
+	}
+	registeredEvents.Store(eventItem.EventName, eventItem.Handlers)
+	return nil
+}
+
+func RegisterEvents[T IEvent](eventItems []EventItem[T]) error {
 	for _, eventItem := range eventItems {
-		if _, ok := registeredEvents[eventItem.EventName]; ok {
+		if _, ok := registeredEvents.Load(eventItem.EventName); ok {
 			return ErrEventAlreadyRegistered
 		}
-		registeredEvents[eventItem.EventName] = eventItem.Handlers
+		registeredEvents.Store(eventItem.EventName, eventItem.Handlers)
 	}
 	return nil
 }
 
-func Dispatch(ctx context.Context, event IEvent) (err error) {
-	handlers, ok := registeredEvents[event.EventName()]
+func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
+	handlers, ok := registeredEvents.Load(event.EventName())
 	if !ok {
 		return nil
 	}
@@ -32,7 +42,12 @@ func Dispatch(ctx context.Context, event IEvent) (err error) {
 		}
 	}()
 
-	for _, handler := range handlers {
+	typedHandlers, ok := handlers.([]IEventHandler[T])
+	if !ok {
+		return ErrEventHandlerType
+	}
+
+	for _, handler := range typedHandlers {
 		err = handler(ctx, event)
 		if err != nil {
 			return
@@ -42,17 +57,17 @@ func Dispatch(ctx context.Context, event IEvent) (err error) {
 	return
 }
 
-func DispatchAsync(ctx context.Context, event IEvent) chan error {
+func DispatchAsync[T IEvent](ctx context.Context, event T) chan error {
 	c := make(chan error)
 
-	go func(ctx context.Context, event IEvent) {
+	go func(ctx context.Context, event T) {
 		defer close(c)
-		c <- Dispatch(ctx, event)
+		c <- Dispatch[T](ctx, event)
 	}(ctx, event)
 
 	return c
 }
 
-func DispatchAsyncAwait(ctx context.Context, event IEvent) error {
-	return <-DispatchAsync(ctx, event)
+func DispatchAsyncAwait[T IEvent](ctx context.Context, event T) error {
+	return <-DispatchAsync[T](ctx, event)
 }

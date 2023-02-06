@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/bordunosp/ddd/Assertion"
 	"github.com/bordunosp/ddd/CQRS/CommandBus"
 	"github.com/bordunosp/ddd/CQRS/EventBus"
 	"github.com/bordunosp/ddd/CQRS/QueryBus"
 	"github.com/bordunosp/ddd/DI"
 	"github.com/bordunosp/ddd/example/app/user/application/command/CreateNew"
 	"github.com/bordunosp/ddd/example/app/user/application/command/UpdateEmail"
-	"github.com/bordunosp/ddd/example/app/user/application/event/user/created"
+	"github.com/bordunosp/ddd/example/app/user/application/event/user/Created"
 	"github.com/bordunosp/ddd/example/app/user/application/query/Info"
 	"github.com/bordunosp/ddd/example/app/user/domain/event"
 	"github.com/bordunosp/ddd/example/app/user/infrastructure"
@@ -15,7 +16,7 @@ import (
 	"os"
 )
 
-func main() {
+func registerDI() {
 	err := DI.RegisterServices([]DI.ServiceItem{
 		{
 			// will be initialized immediately (once)
@@ -40,45 +41,61 @@ func main() {
 			},
 		},
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
+	Assertion.ErrorIsNull(err, "Cant register DI services")
+}
 
-	err = CommandBus.RegisterCommands([]CommandBus.CommandItem{
-		{CreateNew.CommandName, CreateNew.Handler},
-		{UpdateEmail.CommandName, UpdateEmail.Handler},
+func registerCommands() {
+	err := CommandBus.RegisterCommand[CreateNew.Command](CommandBus.CommandItem[CreateNew.Command]{
+		CommandName: CreateNew.CommandName,
+		Handler:     CreateNew.Handler[CreateNew.Command],
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
+	Assertion.ErrorIsNull(err, "Cant register command "+CreateNew.CommandName)
 
-	err = QueryBus.RegisterQueries([]QueryBus.QueryItem{
-		{Info.QueryName, Info.Handler},
+	err = CommandBus.RegisterCommand[UpdateEmail.Command](CommandBus.CommandItem[UpdateEmail.Command]{
+		CommandName: UpdateEmail.CommandName,
+		Handler:     UpdateEmail.Handler[UpdateEmail.Command],
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
+	Assertion.ErrorIsNull(err, "Cant register command "+UpdateEmail.CommandName)
+}
 
-	err = EventBus.RegisterEvents([]EventBus.EventItem{
-		{
-			EventName: event.UserCreatedEvent,
-			Handlers: []EventBus.IEventHandler{
-				Created.SaveLogHandler,
-				Created.SendEmailHandler,
-			},
-		},
+func registerQueries() {
+	err := QueryBus.RegisterQuery[Info.Query, Info.Response](QueryBus.QueryItem[Info.Query, Info.Response]{
+		QueryName: Info.QueryName,
+		Handler:   Info.Handler[Info.Query, Info.Response],
+	})
+	Assertion.ErrorIsNull(err, "Cant register query "+Info.QueryName)
+}
 
-		{event.UserUpdatedEvent, []EventBus.IEventHandler{
+func registerEvents() {
+	err := EventBus.RegisterEvent[EventBus.IEvent](EventBus.EventItem[EventBus.IEvent]{
+		EventName: event.UserUpdatedEvent,
+		Handlers:  []EventBus.IEventHandler[EventBus.IEvent]{
 			// event may not have handlers
 			//
 			// you never know when it might be really useful
 			// that is why events are created long before handlers are created.
-		}},
+		},
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
+	Assertion.ErrorIsNull(err, "Cant register Event "+event.UserUpdatedEvent)
 
+	err = EventBus.RegisterEvent[event.UserCreated](EventBus.EventItem[event.UserCreated]{
+		EventName: event.UserCreatedEvent,
+		Handlers: []EventBus.IEventHandler[event.UserCreated]{
+			Created.SaveLogHandler,
+			Created.SendEmailHandler,
+		},
+	})
+	Assertion.ErrorIsNull(err, "Cant register Event "+event.UserCreatedEvent)
+}
+
+func init() {
+	registerDI()
+	registerCommands()
+	registerQueries()
+	registerEvents()
+}
+
+func main() {
 	// Use service from DI
 	// it can be used anywhere in your project (after registered)
 	logger, _ := DI.Get[*log.Logger]("logger")

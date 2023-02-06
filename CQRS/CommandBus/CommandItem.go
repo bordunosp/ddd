@@ -1,6 +1,6 @@
 package CommandBus
 
-type CommandItem struct {
+type CommandItem[T ICommand] struct {
 	CommandName string
-	Handler     ICommandHandler
+	Handler     ICommandHandler[T]
 }

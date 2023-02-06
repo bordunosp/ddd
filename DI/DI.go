@@ -10,7 +10,7 @@ var ErrServiceNotRegistered = errors.New("service not registered")
 var ErrServiceHasIncorrectType = errors.New("service has incorrect type")
 var ErrServiceAlreadyRegistered = errors.New("service already registered")
 
-var registeredServices = sync.Map{}
+var registeredServices = &sync.Map{}
 
 func Get[T any](serviceName string) (T, error) {
 	var serviceT T

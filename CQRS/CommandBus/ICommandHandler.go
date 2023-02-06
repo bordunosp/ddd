@@ -2,4 +2,4 @@ package CommandBus
 
 import "context"
 
-type ICommandHandler func(ctx context.Context, commandAny ICommand) error
+type ICommandHandler[T ICommand] func(ctx context.Context, commandAny T) error

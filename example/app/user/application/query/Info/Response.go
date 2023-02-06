@@ -1,7 +1,7 @@
 package Info
 
-func NewResponse(name, email string) *Response {
-	return &Response{
+func NewResponse(name, email string) Response {
+	return Response{
 		Name:  name,
 		Email: email,
 	}

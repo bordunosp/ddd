@@ -1,6 +1,6 @@
 package EventBus
 
-type EventItem struct {
+type EventItem[T IEvent] struct {
 	EventName string
-	Handlers  []IEventHandler
+	Handlers  []IEventHandler[T]
 }

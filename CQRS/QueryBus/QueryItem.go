@@ -1,6 +1,6 @@
 package QueryBus
 
-type QueryItem struct {
+type QueryItem[T IQuery, K any] struct {
 	QueryName string
-	Handler   IQueryHandler
+	Handler   IQueryHandler[T, K]
 }

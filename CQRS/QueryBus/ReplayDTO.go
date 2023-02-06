@@ -1,6 +1,6 @@
 package QueryBus
 
-type ReplayDTO struct {
-	Value any
+type ReplayDTO[K any] struct {
+	Value K
 	Err   error
 }
