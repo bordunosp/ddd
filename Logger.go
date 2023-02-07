@@ -4,7 +4,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
-	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -49,8 +48,8 @@ type loggerZerolog struct {
 	log zerolog.Logger
 }
 
-func (l *loggerZerolog) LoggerForDb() io.Writer {
-	return &l.log
+func (l *loggerZerolog) Printf(s string, a ...any) {
+	l.log.Printf(s, a)
 }
 
 func (l *loggerZerolog) With(key, val string) ILogger {
