@@ -6,7 +6,7 @@ import (
 )
 
 func Handler(ctx context.Context, command Command) error {
-	log.Print(command.Name)
+	log.Print("Print from command Handler: ", command.Name)
 
 	return nil
 }

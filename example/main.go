@@ -47,17 +47,11 @@ func registerDI() {
 }
 
 func registerCommands() {
-	err := CommandBus.RegisterCommand[CreateNew.Command](CommandBus.CommandItem[CreateNew.Command]{
-		CommandName: CreateNew.CommandName,
-		Handler:     CreateNew.Handler,
-	})
-	Assertion.ErrorIsNull(err, "Cant register command "+CreateNew.CommandName)
+	err := CommandBus.Register(CreateNew.Handler)
+	Assertion.ErrorIsNull(err, "Cant register command "+CreateNew.Command{}.CommandName())
 
-	err = CommandBus.RegisterCommand[UpdateEmail.Command](CommandBus.CommandItem[UpdateEmail.Command]{
-		CommandName: UpdateEmail.CommandName,
-		Handler:     UpdateEmail.Handler,
-	})
-	Assertion.ErrorIsNull(err, "Cant register command "+UpdateEmail.CommandName)
+	err = CommandBus.Register(UpdateEmail.Handler)
+	Assertion.ErrorIsNull(err, "Cant register command "+UpdateEmail.Command{}.CommandName())
 }
 
 func registerQueries() {
@@ -95,15 +89,27 @@ func init() {
 }
 
 func main() {
+	ctx := context.TODO()
+
 	// Use service from DI
 	// it can be used anywhere in your project (after registered)
 	logger, _ := DI.Get[*log.Logger]("logger")
 	logger.Println("logger.Println called")
 
-	ctx := context.TODO()
-	query := Info.Query{Id: uuid.New()}
+	// QueryBus Handle
+	query := Info.Query{
+		Id: uuid.New(),
+	}
 	res, err := QueryBus.Handle[Info.Response](ctx, query)
 	Assertion.ErrorIsNull(err, "Query handle "+query.QueryName())
-
 	logger.Println("Name from query response: ", res.Name)
+
+	// CommandBus Handle
+	command := CreateNew.Command{
+		Id:    uuid.New(),
+		Name:  "some commandDTO Name",
+		Email: "some@commandDTO.name",
+	}
+	err = CommandBus.Execute(ctx, command)
+	Assertion.ErrorIsNull(err, "Command handle "+command.CommandName())
 }

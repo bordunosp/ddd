@@ -1,19 +1,8 @@
 package CreateNew
 
 import (
-	"github.com/bordunosp/ddd/CQRS/CommandBus"
 	"github.com/google/uuid"
 )
-
-const CommandName = "CreateNewCommand"
-
-func NewCommand(id uuid.UUID, name string, email string) CommandBus.ICommand {
-	return &Command{
-		Id:    id,
-		Name:  name,
-		Email: email,
-	}
-}
 
 type Command struct {
 	Id    uuid.UUID
@@ -22,5 +11,5 @@ type Command struct {
 }
 
 func (c Command) CommandName() string {
-	return CommandName
+	return "CreateNewCommand"
 }

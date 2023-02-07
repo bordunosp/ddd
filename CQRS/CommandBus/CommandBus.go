@@ -13,22 +13,14 @@ var ErrCommandHandlerType = errors.New("ICommandHandler has incorrect types")
 
 var registeredCommands = &sync.Map{}
 
-func RegisterCommand[T ICommand](commandItem CommandItem[T]) error {
-	if _, ok := registeredCommands.Load(commandItem.CommandName); ok {
+func Register[T ICommand](handler ICommandHandler[T]) error {
+	var command T
+
+	if _, ok := registeredCommands.Load(command.CommandName()); ok {
 		return ErrCommandAlreadyRegistered
 	}
 
-	registeredCommands.Store(commandItem.CommandName, commandItem.Handler)
-	return nil
-}
-
-func RegisterCommands[T ICommand](commandItems []CommandItem[T]) error {
-	for _, commandItem := range commandItems {
-		if _, ok := registeredCommands.Load(commandItem.CommandName); ok {
-			return ErrCommandAlreadyRegistered
-		}
-		registeredCommands.Store(commandItem.CommandName, commandItem.Handler)
-	}
+	registeredCommands.Store(command.CommandName(), handler)
 	return nil
 }
 
