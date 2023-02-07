@@ -1,5 +1,5 @@
 
-## Event
+## Event (DTO)
 ###### src: app/user/domain/event/UserCreated.go
 ```golang
 package event
@@ -10,24 +10,16 @@ import (
     "github.com/bordunosp/ddd/CQRS/EventBus"
 )
 
-const UserCreatedEvent = "UserCreatedEvent"
-
-func NewUserCreated(id uuid.UUID, name, email string) EventBus.IEvent {
-    return &UserCreated{
-        Id:    id,
-        Name:  name,
-        Email: email,
-    }
-}
-
 type UserCreated struct {
     Id    uuid.UUID
     Name  string
     Email string
 }
 
+// implemented interface EventBus.IEvent 
+// (need uniq name for registration)
 func (u UserCreated) EventName() string {
-    return UserCreatedEvent
+    return "UserCreatedEvent"
 }
 ```
 
@@ -38,23 +30,27 @@ package Created
 
 import (
     "context"
-    "github.com/bordunosp/ddd/CQRS/EventBus"
     "github.com/bordunosp/ddd/DI"
     "github.com/bordunosp/ddd/example/app/user/domain"
     "github.com/bordunosp/ddd/example/app/user/domain/event"
+    "log"
 )
 
-func SendEmailHandler(ctx context.Context, eventAny EventBus.IEvent) error {
-    request, _ := eventAny.(event.UserCreated)
+// For One event can be many handles
 
-	var userService domain.IUserService
-	userService, err := DI.Get("UserService", userService)
-	if err != nil {
-		return err
-	}
-
-    return userService.SendCreatedEmail(ctx, request.Id)
+func SendEmailHandler(ctx context.Context, event event.UserCreated) error {
+    // todo: send email
+    log.Print("Print email from SendEmailHandler: ", event.Email)
+    return nil
 }
+
+func SaveLogHandler(ctx context.Context, event event.UserCreated) error {
+    // todo: save logs
+    log.Print("Print name from SaveLogHandler: ", event.Name)
+    return nil
+}
+
+
 ```
 
 ## Event vs AggregateRoot
@@ -63,16 +59,17 @@ user, _ := NewUser(uuid.New(), "name", "email@test.com")
 event := NewCreatedEvent(user.UUID())
 _ := user.AddDomainEvent(event)
 
-// DomainEvents must be executed before the transaction is committed
+// DomainEvents must be executed before or after the transaction is committed
+// but always in one transaction
 
 // 1) open transaction
-// 2) Execute DomainEvents user.DomainEvents()
-// 3) Save user to DB
+// 2) Save user to DB
+// 3) Execute DomainEvents user.DomainEvents()
 // 4) commit transaction 
 ```
 
 
-## EventBus Register
+## Event vs EventBus (Register)
 ```golang
 package main
 
@@ -84,21 +81,19 @@ import (
 )
 
 func main() {
-    err := EventBus.RegisterEvents([]EventBus.EventItem{
-        {
-            EventName: event.UserCreatedEvent,
-            Handlers: []EventBus.IEventHandler{
-                Created.SaveLogHandler,
-                Created.SendEmailHandler,
-            },
-        },
+    err := EventBus.Register([]EventBus.IEventHandler[event.UserCreated]{
+        Created.SaveLogHandler,
+        Created.SendEmailHandler,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
 
-        {event.UserUpdatedEvent, []EventBus.IEventHandler{
-            // event may not have handlers
-            //
-            // you never know when it might be really useful
-            // that is why events are created long before handlers are created.
-        }},
+    err = EventBus.Register([]EventBus.IEventHandler[event.UserUpdated]{
+        // event may not have handlers
+        //
+        // you never know when it might be really useful
+        // that is why events are created long before handlers are created.
     })
     if err != nil {
         log.Fatal(err)
@@ -106,7 +101,7 @@ func main() {
 }
 ```
 
-## EventBus Usage
+## Event vs EventBus (Usage)
 ```golang
 import (
     "github.com/google/uuid"
@@ -114,11 +109,18 @@ import (
     domainEvent "github.com/bordunosp/ddd/example/app/user/domain/event"
 )
 
-ctx := context.TODO()
-event := domainEvent.NewUserCreated(uuid.New(), "John Doe", "john-doe@email.com")
-
-// choose 1 of 3 possible ways to execute handlers
-_ = EventBus.Dispatch(ctx, event)
-_ = EventBus.DispatchAsync(ctx, event)
-_ = EventBus.DispatchAsyncAwait(ctx, event)
+func main() {
+    ctx := context.TODO()
+	
+    event = event.UserCreated{
+        Id:    uuid.New(),
+        Name:  "some eventDTO name",
+        Email: "some@event.email",
+    }
+	
+    // choose 1 of 3 possible ways to execute handlers
+    _ = EventBus.Dispatch(ctx, event)
+    _ = EventBus.DispatchAsync(ctx, event)
+    _ = EventBus.DispatchAsyncAwait(ctx, event)
+}
 ```

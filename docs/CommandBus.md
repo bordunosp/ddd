@@ -1,30 +1,20 @@
 
-## Command
+## Command (DTO)
 ###### src: app/user/application/command/UpdateEmail/Command.go
 ```golang
 package UpdateEmail
 
-import (
-    "github.com/bordunosp/ddd/CQRS/CommandBus"
-    "github.com/google/uuid"
-)
-
-const CommandName = "UpdateEmailCommand"
-
-func NewCommand(id uuid.UUID, email string) CommandBus.ICommand {
-    return &Command{
-        Id:    id,
-        Email: email,
-    }
-}
+import "github.com/google/uuid"
 
 type Command struct {
     Id    uuid.UUID
     Email string
 }
 
+// implemented interface CommandBus.ICommand 
+// (need uniq name for registration)
 func (c Command) CommandName() string {
-    return CommandName
+    return "UpdateEmailCommand"
 }
 ```
 
@@ -35,16 +25,12 @@ package UpdateEmail
 
 import (
     "context"
-    "github.com/bordunosp/ddd/DI"
-    "github.com/bordunosp/ddd/CQRS/CommandBus"
+    "log"
 )
 
-func Handler(ctx context.Context, commandAny CommandBus.ICommand) error {
-    request, _ := commandAny.(Command)
-
-    loggerAny, _ := DI.Get("logger")
-    loggerAny.(*log.Logger).Println(request.Email)
-	
+func Handler(ctx context.Context, command Command) error {
+    // todo: update email
+    log.Print(command.Email)
     return nil
 }
 ```
@@ -62,10 +48,12 @@ import (
 )
 
 func main() {
-    err := CommandBus.RegisterCommands([]CommandBus.CommandItem{
-        {CreateNew.CommandName, CreateNew.Handler},
-        {UpdateEmail.CommandName, UpdateEmail.Handler},
-    })
+    err := CommandBus.Register(UpdateEmail.Handler)
+    if err != nil {
+        log.Fatal(err)
+    }
+	
+    err = CommandBus.Register(CreateNew.Handler)
     if err != nil {
         log.Fatal(err)
     }
@@ -80,11 +68,18 @@ import (
     "github.com/bordunosp/ddd/example/app/user/application/command/UpdateEmail"
 )
 
-ctx := context.TODO()
-command := UpdateEmail.NewCommand(uuid.New(), "some@new.email")
+func main() {
+    ctx := context.TODO()
+	
+    command := CreateNew.Command{
+        Id:    uuid.New(),
+        Name:  "some commandDTO Name",
+        Email: "some@commandDTO.name",
+    }
 
-// choose 1 of 3 possible ways to execute handler
-_ = CommandBus.Execute(ctx, command)
-_ = CommandBus.ExecuteAsync(ctx, command)
-_ = CommandBus.ExecuteAsyncAwait(ctx, command)
+    // choose 1 of 3 possible ways to execute handler
+    _ = CommandBus.Execute(ctx, command)
+    _ = CommandBus.ExecuteAsync(ctx, command)
+    _ = CommandBus.ExecuteAsyncAwait(ctx, command)
+}
 ```

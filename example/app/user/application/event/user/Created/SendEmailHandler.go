@@ -14,6 +14,6 @@ func SendEmailHandler(ctx context.Context, event event.UserCreated) error {
 		return err
 	}
 
-	log.Print("Print name from SendEmailHandler: ", event.Email)
+	log.Print("Print email from SendEmailHandler: ", event.Email)
 	return userService.SendCreatedEmail(ctx, event.Id)
 }

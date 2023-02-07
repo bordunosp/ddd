@@ -1,33 +1,35 @@
 
 
 
-## Query
+## Query (DTO)
 ###### src: app/user/application/query/Info/Query.go
 ```golang
 package Info
 
-import (
-    "github.com/bordunosp/ddd/CQRS/QueryBus"
-    "github.com/google/uuid"
-)
-
-const QueryName = "InfoQuery"
-
-func NewQuery(id uuid.UUID) QueryBus.IQuery {
-    return &Query{
-        Id: id,
-    }
-}
+import "github.com/google/uuid"
 
 type Query struct {
     Id uuid.UUID
 }
 
+// implemented interface QueryBus.IQuery 
+// (need uniq name for registration)
 func (c Query) QueryName() string {
-    return QueryName
+    return "InfoQuery"
 }
 ```
 
+
+## Query Response (DTO)
+###### src: app/user/application/query/Info/Response.go
+```golang
+package Info
+
+type Response struct {
+    Name  string
+    Email string
+}
+```
 
 
 ## Query Handler
@@ -37,38 +39,19 @@ package Info
 
 import (
     "context"
-    "github.com/bordunosp/ddd/CQRS/QueryBus"
     "log"
 )
 
-func Handler(ctx context.Context, queryAny QueryBus.IQuery) (any, error) {
-    request, _ := queryAny.(Query)
-	
-    log.Print(request.Id)
+// type of QueryBus.IEventHandler 
+func Handler(ctx context.Context, query Query) (Response, error) {
+    log.Print(query.Id)
 
-    return NewResponse(
-        "name",
-        "email",
-    ), nil
-}
-```
-
-## Query Response
-###### src: app/user/application/query/Info/Response.go
-```golang
-package Info
-
-func NewResponse(name, email string) *Response {
-    return &Response{
-        Name:  name,
-        Email: email,
-    }
+    return Response{
+        Name: "res name",
+        Email: "res@email.com",
+    }, nil
 }
 
-type Response struct {
-    Name  string
-    Email string
-}
 ```
 
 ## QueryBus Register
@@ -82,9 +65,7 @@ import (
 )
 
 func main() {
-    err := QueryBus.RegisterQueries([]QueryBus.QueryItem{
-        {Info.QueryName, Info.Handler},
-    })
+    err := QueryBus.Register(Info.Handler)
     if err != nil {
         log.Fatal(err)
     }
@@ -94,17 +75,26 @@ func main() {
 ## QueryBus Usage
 ```golang
 import (
-    "github.com/google/uuid"
     "github.com/bordunosp/ddd/CQRS/QueryBus"
     "github.com/bordunosp/ddd/example/app/user/application/query/Info"
+    "github.com/google/uuid"
+    "log"
 )
 
-ctx := context.TODO()
-query := Info.NewQuery(uuid.New())
+func main() {
+    ctx := context.TODO()
 
-// choose 1 of 3 possible ways to execute handler
-dto, err = QueryBus.Handle(ctx, query)
-dtoChan  = QueryBus.HandleAsync(ctx, query)
-dto, err = QueryBus.HandleAsyncAwait(ctx, query)
+    query := Info.Query{
+        Id: uuid.New(),
+    }
+
+    // choose 1 of 3 possible ways to execute handler
+    res, err = QueryBus.Handle[Info.Response](ctx, query)
+    resChan  = QueryBus.HandleAsync[Info.Response](ctx, query)
+    res, err = QueryBus.HandleAsyncAwait[Info.Response](ctx, query)
+
+    log.Println("Name from query response: ", res.Name)
+}
+
 ```
 
