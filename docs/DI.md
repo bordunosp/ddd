@@ -8,7 +8,7 @@ import (
     "os"
 )
 
-func main() {
+func init()  {
     err := DI.RegisterServices([]DI.ServiceItem{
         {
             // will be initialized immediately (once)
@@ -34,10 +34,17 @@ func main() {
             },
         },
     })
-	
+
     if err != nil {
         log.Fatal(err)
     }
+}
+
+func main() {
+    // if service (registered as singleton) implemented ddd.IDisposable interface
+    // it will be called for dispose
+    // can be used for close connections etc... 
+    defer DI.Dispose()
 
     // Use service from DI
     // it can be used anywhere in your project (after registered)
