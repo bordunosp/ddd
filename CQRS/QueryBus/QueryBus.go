@@ -13,25 +13,18 @@ var ErrQueryHandlerType = errors.New("IQueryHandler has incorrect types")
 
 var registeredQueries = &sync.Map{}
 
-func RegisterQuery[T IQuery, K any](queryItem QueryItem[T, K]) error {
-	if _, ok := registeredQueries.Load(queryItem.QueryName); ok {
+func Register[T IQuery, K any](handler IQueryHandler[T, K]) error {
+	var query T
+
+	if _, ok := registeredQueries.Load(query.QueryName()); ok {
 		return ErrQueryAlreadyRegistered
 	}
-	registeredQueries.Store(queryItem.QueryName, queryItem.Handler)
+
+	registeredQueries.Store(query.QueryName(), handler)
 	return nil
 }
 
-func RegisterQueries[T IQuery, K any](queryItems []QueryItem[T, K]) error {
-	for _, queryItem := range queryItems {
-		if _, ok := registeredQueries.Load(queryItem.QueryName); ok {
-			return ErrQueryAlreadyRegistered
-		}
-		registeredQueries.Store(queryItem.QueryName, queryItem.Handler)
-	}
-	return nil
-}
-
-func Handle[T IQuery, K any](ctx context.Context, query T) (value K, err error) {
+func Handle[K any, T IQuery](ctx context.Context, query T) (value K, err error) {
 	handler, ok := registeredQueries.Load(query.QueryName())
 	if !ok {
 		return value, ErrQueryNotRegistered
@@ -52,19 +45,19 @@ func Handle[T IQuery, K any](ctx context.Context, query T) (value K, err error) 
 	return
 }
 
-func HandleAsync[T IQuery, K any](ctx context.Context, query T) chan ReplayDTO[K] {
+func HandleAsync[K any, T IQuery](ctx context.Context, query T) chan ReplayDTO[K] {
 	replay := make(chan ReplayDTO[K])
 
 	go func(query T) {
 		defer close(replay)
-		value, err := Handle[T, K](ctx, query)
+		value, err := Handle[K, T](ctx, query)
 		replay <- *&ReplayDTO[K]{Value: value, Err: err}
 	}(query)
 
 	return replay
 }
 
-func HandleAsyncAwait[T IQuery, K any](ctx context.Context, query T) (K, error) {
-	replay := <-HandleAsync[T, K](ctx, query)
+func HandleAsyncAwait[K any, T IQuery](ctx context.Context, query T) (K, error) {
+	replay := <-HandleAsync[K, T](ctx, query)
 	return replay.Value, replay.Err
 }

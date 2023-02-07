@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/bordunosp/ddd/Assertion"
 	"github.com/bordunosp/ddd/CQRS/CommandBus"
 	"github.com/bordunosp/ddd/CQRS/EventBus"
@@ -12,6 +13,7 @@ import (
 	"github.com/bordunosp/ddd/example/app/user/application/query/Info"
 	"github.com/bordunosp/ddd/example/app/user/domain/event"
 	"github.com/bordunosp/ddd/example/app/user/infrastructure"
+	"github.com/google/uuid"
 	"log"
 	"os"
 )
@@ -47,23 +49,20 @@ func registerDI() {
 func registerCommands() {
 	err := CommandBus.RegisterCommand[CreateNew.Command](CommandBus.CommandItem[CreateNew.Command]{
 		CommandName: CreateNew.CommandName,
-		Handler:     CreateNew.Handler[CreateNew.Command],
+		Handler:     CreateNew.Handler,
 	})
 	Assertion.ErrorIsNull(err, "Cant register command "+CreateNew.CommandName)
 
 	err = CommandBus.RegisterCommand[UpdateEmail.Command](CommandBus.CommandItem[UpdateEmail.Command]{
 		CommandName: UpdateEmail.CommandName,
-		Handler:     UpdateEmail.Handler[UpdateEmail.Command],
+		Handler:     UpdateEmail.Handler,
 	})
 	Assertion.ErrorIsNull(err, "Cant register command "+UpdateEmail.CommandName)
 }
 
 func registerQueries() {
-	err := QueryBus.RegisterQuery[Info.Query, Info.Response](QueryBus.QueryItem[Info.Query, Info.Response]{
-		QueryName: Info.QueryName,
-		Handler:   Info.Handler[Info.Query, Info.Response],
-	})
-	Assertion.ErrorIsNull(err, "Cant register query "+Info.QueryName)
+	err := QueryBus.Register(Info.Handler)
+	Assertion.ErrorIsNull(err, "Cant register query "+Info.Query{}.QueryName())
 }
 
 func registerEvents() {
@@ -100,4 +99,11 @@ func main() {
 	// it can be used anywhere in your project (after registered)
 	logger, _ := DI.Get[*log.Logger]("logger")
 	logger.Println("logger.Println called")
+
+	ctx := context.TODO()
+	query := Info.Query{Id: uuid.New()}
+	res, err := QueryBus.Handle[Info.Response](ctx, query)
+	Assertion.ErrorIsNull(err, "Query handle "+query.QueryName())
+
+	logger.Println("Name from query response: ", res.Name)
 }
