@@ -5,6 +5,7 @@ import (
 	"github.com/bordunosp/ddd/DI"
 	"github.com/bordunosp/ddd/example/app/user/domain"
 	"github.com/bordunosp/ddd/example/app/user/domain/event"
+	"log"
 )
 
 func SendEmailHandler(ctx context.Context, event event.UserCreated) error {
@@ -13,5 +14,6 @@ func SendEmailHandler(ctx context.Context, event event.UserCreated) error {
 		return err
 	}
 
+	log.Print("Print name from SendEmailHandler: ", event.Email)
 	return userService.SendCreatedEmail(ctx, event.Id)
 }

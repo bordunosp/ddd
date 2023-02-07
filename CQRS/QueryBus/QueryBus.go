@@ -9,7 +9,7 @@ import (
 
 var ErrQueryAlreadyRegistered = errors.New("query already registered")
 var ErrQueryNotRegistered = errors.New("query not registered")
-var ErrQueryHandlerType = errors.New("IQueryHandler has incorrect types")
+var ErrQueryHandlerType = errors.New("IQueryHandler has incorrect type")
 
 var registeredQueries = &sync.Map{}
 

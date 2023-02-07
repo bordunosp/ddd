@@ -9,7 +9,7 @@ import (
 
 var ErrCommandAlreadyRegistered = errors.New("command already registered")
 var ErrCommandNotRegistered = errors.New("command not registered")
-var ErrCommandHandlerType = errors.New("ICommandHandler has incorrect types")
+var ErrCommandHandlerType = errors.New("ICommandHandler has incorrect type")
 
 var registeredCommands = &sync.Map{}
 

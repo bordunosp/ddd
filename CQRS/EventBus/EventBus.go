@@ -8,25 +8,17 @@ import (
 )
 
 var ErrEventAlreadyRegistered = errors.New("event already registered")
-var ErrEventHandlerType = errors.New("IEventHandler has incorrect types")
+var ErrEventHandlerType = errors.New("IEventHandler has incorrect type")
 
 var registeredEvents = &sync.Map{}
 
-func RegisterEvent[T IEvent](eventItem EventItem[T]) error {
-	if _, ok := registeredEvents.Load(eventItem.EventName); ok {
+func Register[T IEvent](handlers []IEventHandler[T]) error {
+	var event T
+
+	if _, ok := registeredEvents.Load(event.EventName()); ok {
 		return ErrEventAlreadyRegistered
 	}
-	registeredEvents.Store(eventItem.EventName, eventItem.Handlers)
-	return nil
-}
-
-func RegisterEvents[T IEvent](eventItems []EventItem[T]) error {
-	for _, eventItem := range eventItems {
-		if _, ok := registeredEvents.Load(eventItem.EventName); ok {
-			return ErrEventAlreadyRegistered
-		}
-		registeredEvents.Store(eventItem.EventName, eventItem.Handlers)
-	}
+	registeredEvents.Store(event.EventName(), handlers)
 	return nil
 }
 

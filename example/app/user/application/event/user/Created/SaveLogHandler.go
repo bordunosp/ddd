@@ -7,7 +7,6 @@ import (
 )
 
 func SaveLogHandler(ctx context.Context, event event.UserCreated) error {
-	log.Print(event.Id.String())
-
+	log.Print("Print name from SaveLogHandler: ", event.Name)
 	return nil
 }

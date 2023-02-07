@@ -47,38 +47,28 @@ func registerDI() {
 }
 
 func registerCommands() {
-	err := CommandBus.Register(CreateNew.Handler)
-	Assertion.ErrorIsNull(err, "Cant register command "+CreateNew.Command{}.CommandName())
-
-	err = CommandBus.Register(UpdateEmail.Handler)
-	Assertion.ErrorIsNull(err, "Cant register command "+UpdateEmail.Command{}.CommandName())
+	Assertion.ErrorIsNull(CommandBus.Register(CreateNew.Handler), "CreateNew.Handler register")
+	Assertion.ErrorIsNull(CommandBus.Register(UpdateEmail.Handler), "UpdateEmail.Handler register")
 }
 
 func registerQueries() {
-	err := QueryBus.Register(Info.Handler)
-	Assertion.ErrorIsNull(err, "Cant register query "+Info.Query{}.QueryName())
+	Assertion.ErrorIsNull(QueryBus.Register(Info.Handler), "Info.Handler register")
 }
 
 func registerEvents() {
-	err := EventBus.RegisterEvent[EventBus.IEvent](EventBus.EventItem[EventBus.IEvent]{
-		EventName: event.UserUpdatedEvent,
-		Handlers:  []EventBus.IEventHandler[EventBus.IEvent]{
-			// event may not have handlers
-			//
-			// you never know when it might be really useful
-			// that is why events are created long before handlers are created.
-		},
+	err := EventBus.Register([]EventBus.IEventHandler[event.UserCreated]{
+		Created.SaveLogHandler,
+		Created.SendEmailHandler,
 	})
-	Assertion.ErrorIsNull(err, "Cant register Event "+event.UserUpdatedEvent)
+	Assertion.ErrorIsNull(err, "event.UserCreated register")
 
-	err = EventBus.RegisterEvent[event.UserCreated](EventBus.EventItem[event.UserCreated]{
-		EventName: event.UserCreatedEvent,
-		Handlers: []EventBus.IEventHandler[event.UserCreated]{
-			Created.SaveLogHandler,
-			Created.SendEmailHandler,
-		},
+	err = EventBus.Register([]EventBus.IEventHandler[event.UserUpdated]{
+		// event may not have handlers
+		//
+		// you never know when it might be really useful
+		// that is why events are created long before handlers are created.
 	})
-	Assertion.ErrorIsNull(err, "Cant register Event "+event.UserCreatedEvent)
+	Assertion.ErrorIsNull(err, "event.UserUpdated register")
 }
 
 func init() {
@@ -97,19 +87,25 @@ func main() {
 	logger.Println("logger.Println called")
 
 	// QueryBus Handle
-	query := Info.Query{
+	res, err := QueryBus.Handle[Info.Response](ctx, Info.Query{
 		Id: uuid.New(),
-	}
-	res, err := QueryBus.Handle[Info.Response](ctx, query)
-	Assertion.ErrorIsNull(err, "Query handle "+query.QueryName())
+	})
+	Assertion.ErrorIsNull(err, "Info.Query handle")
 	logger.Println("Name from query response: ", res.Name)
 
 	// CommandBus Handle
-	command := CreateNew.Command{
+	err = CommandBus.Execute(ctx, CreateNew.Command{
 		Id:    uuid.New(),
 		Name:  "some commandDTO Name",
 		Email: "some@commandDTO.name",
-	}
-	err = CommandBus.Execute(ctx, command)
-	Assertion.ErrorIsNull(err, "Command handle "+command.CommandName())
+	})
+	Assertion.ErrorIsNull(err, "CreateNew.Command handle")
+
+	// EventBus Handle
+	err = EventBus.Dispatch(ctx, event.UserCreated{
+		Id:    uuid.New(),
+		Name:  "some eventDTO name",
+		Email: "some@event.email",
+	})
+	Assertion.ErrorIsNull(err, "event.UserCreated handle")
 }

@@ -19,5 +19,6 @@ type userService struct {
 
 func (u *userService) SendCreatedEmail(cnt context.Context, userId uuid.UUID) error {
 	//TODO implement me
-	panic("implement me")
+	u.logger.Println("SendCreatedEmail called with userId: " + userId.String())
+	return nil
 }
