@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -46,6 +47,10 @@ func NewLoggerFromZerolog(isProd bool, microServiceName string) (ILogger, error)
 
 type loggerZerolog struct {
 	log zerolog.Logger
+}
+
+func (l *loggerZerolog) LoggerForDb() io.Writer {
+	return &l.log
 }
 
 func (l *loggerZerolog) With(key, val string) ILogger {

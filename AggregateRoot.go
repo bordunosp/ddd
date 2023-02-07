@@ -25,6 +25,10 @@ func (a *aggregateRoot) UUID() uuid.UUID {
 	return a.id
 }
 
+func (a *aggregateRoot) IsEqual(other IAggregateRoot) bool {
+	return a.ID() == other.ID()
+}
+
 func (a *aggregateRoot) DomainEvents() []EventBus.IEvent {
 	return a.domainEvents
 }

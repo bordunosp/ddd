@@ -24,10 +24,6 @@ func (e *entity) UUID() uuid.UUID {
 	return e.id
 }
 
-func (e *entity) AggregateID() string {
-	return e.aggregateID.String()
-}
-
-func (e *entity) AggregateUUID() uuid.UUID {
-	return e.aggregateID
+func (e *entity) IsEqual(other IEntity) bool {
+	return other.ID() == e.ID()
 }

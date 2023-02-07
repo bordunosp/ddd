@@ -1,7 +1,10 @@
 package ddd
 
+import "io"
+
 type ILogger interface {
 	With(key, val string) ILogger
+	LoggerForDb() io.Writer
 
 	Info(msg string)
 	Infof(format string, v ...any)
