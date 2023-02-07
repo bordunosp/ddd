@@ -12,3 +12,4 @@ This repository contains a list of stubs for introducing a project in the CQRS a
 - [Command](https://github.com/bordunosp/ddd/blob/main/docs/CommandBus.md) - is a behavioral design pattern that turns a request into a stand-alone object that contains all information about the request.
 - [Query](https://github.com/bordunosp/ddd/blob/main/docs/QueryBus.md) - is a behavioral design pattern like Command but can return any value (an object structure that can be interpreted into a SQL query)
 - [Event](https://github.com/bordunosp/ddd/blob/main/docs/EventBus.md) - is fundamental design pattern used to create a communication channel and communicate through it via events
+- [Assertion](https://github.com/bordunosp/ddd/blob/main/docs/Assertion.md) - is a list of functions for more readable error checking

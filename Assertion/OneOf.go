@@ -2,7 +2,7 @@ package Assertion
 
 import "errors"
 
-func Choice[T comparable](value T, values []T, msg string) {
+func OneOf[T comparable](value T, values []T, msg string) {
 	contains := false
 
 	for _, a := range values {

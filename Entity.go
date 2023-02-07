@@ -1,6 +1,8 @@
 package ddd
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 func NewEntity(id, aggregateID uuid.UUID) IEntity {
 	return &entity{
