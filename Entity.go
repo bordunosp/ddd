@@ -19,10 +19,10 @@ type entity struct {
 	aggregateID uuid.UUID
 }
 
-func (e *entity) ID() string {
+func (e entity) ID() string {
 	return e.id.String()
 }
 
-func (e *entity) UUID() uuid.UUID {
+func (e entity) UUID() uuid.UUID {
 	return e.id
 }
