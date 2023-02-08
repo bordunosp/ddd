@@ -5,11 +5,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type IAggregateRoot interface {
+type IAggregateRoot[T IAggregateRoot[T]] interface {
 	ID() string
 	UUID() uuid.UUID
-	IsEqual(other IAggregateRoot) bool
 	DomainEvents() []EventBus.IEvent
 	DomainEventsAdd(event EventBus.IEvent)
 	DomainEventsClear()
+
+	IsEqual(other T) bool
 }

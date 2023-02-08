@@ -1,10 +1,13 @@
 package ddd
 
-import (
-	"github.com/google/uuid"
-)
+import "github.com/google/uuid"
 
-func NewEntity(id, aggregateID uuid.UUID) IEntity {
+type Entity interface {
+	ID() string
+	UUID() uuid.UUID
+}
+
+func NewEntity(id, aggregateID uuid.UUID) Entity {
 	return &entity{
 		id:          id,
 		aggregateID: aggregateID,
@@ -22,8 +25,4 @@ func (e *entity) ID() string {
 
 func (e *entity) UUID() uuid.UUID {
 	return e.id
-}
-
-func (e *entity) IsEqual(other IEntity) bool {
-	return other.ID() == e.ID()
 }

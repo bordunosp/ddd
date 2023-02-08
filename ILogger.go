@@ -7,5 +7,7 @@ type ILogger interface {
 	ErrorStack(err error, msg string)
 	FatalStack(err error, msg string)
 	PanicStack(err error, msg string)
+
+	// Printf need for Gorm Logger (debug level)
 	Printf(string, ...any)
 }

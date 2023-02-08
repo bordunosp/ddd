@@ -2,8 +2,8 @@ package ddd
 
 import "github.com/google/uuid"
 
-type IEntity interface {
+type IEntity[T IEntity[T]] interface {
 	ID() string
 	UUID() uuid.UUID
-	IsEqual(other IEntity) bool
+	IsEqual(other T) bool
 }

@@ -48,8 +48,9 @@ type loggerZerolog struct {
 	log zerolog.Logger
 }
 
+// Printf usage for logs from Gorm ORM
 func (l *loggerZerolog) Printf(s string, a ...any) {
-	l.log.Printf(s, a)
+	l.log.Printf(s, a...)
 }
 
 func (l *loggerZerolog) With(key, val string) ILogger {

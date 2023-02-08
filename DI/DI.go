@@ -2,7 +2,6 @@ package DI
 
 import (
 	"errors"
-	"github.com/bordunosp/ddd"
 	"sync"
 )
 
@@ -64,7 +63,7 @@ func RegisterServices(services []ServiceItem) error {
 
 func Dispose() {
 	registeredServices.Range(func(key, service any) bool {
-		if disposableService, ok := service.(ddd.IDisposable); ok {
+		if disposableService, ok := service.(IDisposable); ok {
 			disposableService.Dispose()
 		}
 
