@@ -5,6 +5,8 @@ import "github.com/google/uuid"
 type Entity interface {
 	ID() string
 	UUID() uuid.UUID
+	AggregateID() string
+	AggregateUUID() uuid.UUID
 }
 
 func NewEntity(id, aggregateID uuid.UUID) Entity {
@@ -25,4 +27,12 @@ func (e entity) ID() string {
 
 func (e entity) UUID() uuid.UUID {
 	return e.id
+}
+
+func (e entity) AggregateID() string {
+	return e.aggregateID.String()
+}
+
+func (e entity) AggregateUUID() uuid.UUID {
+	return e.aggregateID
 }
