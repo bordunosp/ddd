@@ -7,9 +7,9 @@ import (
 
 func NewUser(id uuid.UUID, name, email string) User {
 	return &user{
-		IAggregateRoot: ddd.NewAggregateRoot(id),
-		name:           name,
-		email:          email,
+		AggregateRoot: ddd.NewAggregateRoot(id),
+		name:          name,
+		email:         email,
 	}
 }
 
@@ -21,10 +21,15 @@ type User interface {
 }
 
 type user struct {
-	ddd.IAggregateRoot
+	ddd.AggregateRoot
 
 	name  string
 	email string
+}
+
+func (u *user) IsEqual(other ddd.IAggregateRoot) bool {
+	otherObj, ok := other.(User)
+	return ok && u.ID() == otherObj.ID()
 }
 
 func (u *user) Name() string {

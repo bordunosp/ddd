@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/bordunosp/ddd/CQRS"
+	"github.com/bordunosp/ddd/CQRS/Middleware"
 	"sync"
 )
 
@@ -39,6 +40,16 @@ func Handle[K any, T IQuery](ctx context.Context, query T) (value K, err error) 
 	typedHandler, ok := handler.(IQueryHandler[T, K])
 	if !ok {
 		return value, ErrQueryHandlerType
+	}
+
+	err = Middleware.Sanitize(ctx, &query)
+	if err != nil {
+		return value, err
+	}
+
+	err = Middleware.Validate(query)
+	if err != nil {
+		return
 	}
 
 	value, err = typedHandler(ctx, query)

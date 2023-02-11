@@ -8,8 +8,8 @@ import (
 func Handler(ctx context.Context, query Query) (Response, error) {
 	log.Print(query.Id)
 
-	return NewResponse(
+	return Response{
 		"name",
 		"email",
-	), nil
+	}, nil
 }

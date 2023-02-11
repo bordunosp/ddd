@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/bordunosp/ddd/CQRS"
+	"github.com/bordunosp/ddd/CQRS/Middleware"
 	"sync"
 )
 
@@ -37,6 +38,16 @@ func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
 	typedHandlers, ok := handlers.([]IEventHandler[T])
 	if !ok {
 		return ErrEventHandlerType
+	}
+
+	err = Middleware.Sanitize(ctx, &event)
+	if err != nil {
+		return
+	}
+
+	err = Middleware.Validate(event)
+	if err != nil {
+		return
 	}
 
 	for _, handler := range typedHandlers {

@@ -5,7 +5,8 @@ import (
 )
 
 type Query struct {
-	Id uuid.UUID
+	Id   uuid.UUID
+	Name string `mod:"trim" validate:"required"`
 }
 
 func (c Query) QueryName() string {

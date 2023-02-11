@@ -88,7 +88,8 @@ func main() {
 
 	// QueryBus Handle
 	res, err := QueryBus.Handle[Info.Response](ctx, Info.Query{
-		Id: uuid.New(),
+		Id:   uuid.New(),
+		Name: "some name",
 	})
 	Assertion.ErrorIsNull(err, "Info.Query handle")
 	logger.Println("Name from query response: ", res.Name)

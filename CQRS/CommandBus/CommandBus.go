@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/bordunosp/ddd/CQRS"
+	"github.com/bordunosp/ddd/CQRS/Middleware"
 	"sync"
 )
 
@@ -39,6 +40,16 @@ func Execute[T ICommand](ctx context.Context, command T) (err error) {
 	typedHandler, ok := handler.(ICommandHandler[T])
 	if !ok {
 		return ErrCommandHandlerType
+	}
+
+	err = Middleware.Sanitize(ctx, &command)
+	if err != nil {
+		return
+	}
+
+	err = Middleware.Validate(command)
+	if err != nil {
+		return
 	}
 
 	err = typedHandler(ctx, command)
