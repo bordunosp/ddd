@@ -19,7 +19,7 @@ require (
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/segmentio/go-camelcase v0.0.0-20160726192923-7085f1e3c734 // indirect
 	github.com/segmentio/go-snakecase v1.2.0 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 )
