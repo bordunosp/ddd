@@ -16,15 +16,15 @@ var registeredEvents = &sync.Map{}
 func Register[T IEvent](handlers []IEventHandler[T]) error {
 	var event T
 
-	if _, ok := registeredEvents.Load(event.EventName()); ok {
+	if _, ok := registeredEvents.Load(event.EventConfig().Name); ok {
 		return ErrEventAlreadyRegistered
 	}
-	registeredEvents.Store(event.EventName(), handlers)
+	registeredEvents.Store(event.EventConfig().Name, handlers)
 	return nil
 }
 
 func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
-	handlers, ok := registeredEvents.Load(event.EventName())
+	handlers, ok := registeredEvents.Load(event.EventConfig().Name)
 	if !ok {
 		return nil
 	}
@@ -40,14 +40,18 @@ func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
 		return ErrEventHandlerType
 	}
 
-	err = Middleware.Sanitize(ctx, &event)
-	if err != nil {
-		return
+	if event.EventConfig().Sanitize {
+		err = Middleware.Sanitize(ctx, &event)
+		if err != nil {
+			return
+		}
 	}
 
-	err = Middleware.Validate(event)
-	if err != nil {
-		return
+	if event.EventConfig().Validate {
+		err = Middleware.Validate(event)
+		if err != nil {
+			return
+		}
 	}
 
 	for _, handler := range typedHandlers {

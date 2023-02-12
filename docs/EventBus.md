@@ -12,14 +12,17 @@ import (
 
 type UserCreated struct {
     Id    uuid.UUID
-    Name  string
-    Email string
+    Name  string `mod:"trim" validate:"required"`
+    Email string `mod:"trim" validate:"required,email"`
 }
 
 // implemented interface EventBus.IEvent 
 // (need uniq name for registration)
-func (u UserCreated) EventName() string {
-    return "UserCreatedEvent"
+func (e UserCreated) EventConfig() EventBus.EventConfig {
+    return EventBus.EventConfig{
+        Name:     "UserCreatedEvent",
+        Sanitize: true,
+        Validate: true}
 }
 ```
 

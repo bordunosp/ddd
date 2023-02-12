@@ -13,3 +13,5 @@ This repository contains a list of stubs for introducing a project in the CQRS a
 - [Query](https://github.com/bordunosp/ddd/blob/main/docs/QueryBus.md) - is a behavioral design pattern like Command but can return any value (an object structure that can be interpreted into a SQL query)
 - [Event](https://github.com/bordunosp/ddd/blob/main/docs/EventBus.md) - is fundamental design pattern used to create a communication channel and communicate through it via events
 - [Assertion](https://github.com/bordunosp/ddd/blob/main/docs/Assertion.md) - is a list of functions for more readable error checking
+- [Sanitizer](https://github.com/bordunosp/ddd/blob/main/docs/Sanitizer.md) - way of sanitize (command, query, event) DTO
+- [Validator](https://github.com/bordunosp/ddd/blob/main/docs/Validator.md) - way of validate (command, query, event) DTO

@@ -1,6 +1,4 @@
 
-
-
 ## Query (DTO)
 ###### src: app/user/application/query/Info/Query.go
 ```golang
@@ -10,13 +8,20 @@ import "github.com/google/uuid"
 
 type Query struct {
     Id uuid.UUID
+	Name string `mod:"trim" validate:"required"`
 }
 
 // implemented interface QueryBus.IQuery 
 // (need uniq name for registration)
-func (c Query) QueryName() string {
-    return "InfoQuery"
+func (c Query) QueryConfig() QueryBus.QueryConfig {
+    return QueryBus.QueryConfig{
+        Name:             "InfoQuery",
+        Sanitize:         true,
+        Validate:         true,
+        SanitizeResponse: true,
+        ValidateResponse: false}
 }
+
 ```
 
 
@@ -26,8 +31,8 @@ func (c Query) QueryName() string {
 package Info
 
 type Response struct {
-    Name  string
-    Email string
+    Name  string `mod:"trim"`
+    Email string `mod:"trim,lcase"`
 }
 ```
 

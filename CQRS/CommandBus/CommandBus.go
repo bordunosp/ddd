@@ -17,16 +17,16 @@ var registeredCommands = &sync.Map{}
 func Register[T ICommand](handler ICommandHandler[T]) error {
 	var command T
 
-	if _, ok := registeredCommands.Load(command.CommandName()); ok {
+	if _, ok := registeredCommands.Load(command.CommandConfig().Name); ok {
 		return ErrCommandAlreadyRegistered
 	}
 
-	registeredCommands.Store(command.CommandName(), handler)
+	registeredCommands.Store(command.CommandConfig().Name, handler)
 	return nil
 }
 
 func Execute[T ICommand](ctx context.Context, command T) (err error) {
-	handler, ok := registeredCommands.Load(command.CommandName())
+	handler, ok := registeredCommands.Load(command.CommandConfig().Name)
 	if !ok {
 		return ErrCommandNotRegistered
 	}
@@ -42,14 +42,18 @@ func Execute[T ICommand](ctx context.Context, command T) (err error) {
 		return ErrCommandHandlerType
 	}
 
-	err = Middleware.Sanitize(ctx, &command)
-	if err != nil {
-		return
+	if command.CommandConfig().Sanitize {
+		err = Middleware.Sanitize(ctx, &command)
+		if err != nil {
+			return
+		}
 	}
 
-	err = Middleware.Validate(command)
-	if err != nil {
-		return
+	if command.CommandConfig().Validate {
+		err = Middleware.Validate(command)
+		if err != nil {
+			return
+		}
 	}
 
 	err = typedHandler(ctx, command)

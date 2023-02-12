@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/bordunosp/ddd/CQRS/EventBus"
 	"github.com/google/uuid"
 )
 
@@ -10,6 +11,9 @@ type UserCreated struct {
 	Email string
 }
 
-func (u UserCreated) EventName() string {
-	return "UserCreatedEvent"
+func (e UserCreated) EventConfig() EventBus.EventConfig {
+	return EventBus.EventConfig{
+		Name:     "UserCreatedEvent",
+		Sanitize: true,
+		Validate: true}
 }

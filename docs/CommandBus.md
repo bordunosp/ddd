@@ -8,14 +8,18 @@ import "github.com/google/uuid"
 
 type Command struct {
     Id    uuid.UUID
-    Email string
+    Email string `mod:"trim,lcase" validate:"required,email"`
 }
 
 // implemented interface CommandBus.ICommand 
 // (need uniq name for registration)
-func (c Command) CommandName() string {
-    return "UpdateEmailCommand"
+func (c Command) CommandConfig() CommandBus.CommandConfig {
+    return CommandBus.CommandConfig{
+        Name:     "UpdateEmailCommand",
+        Sanitize: true,
+        Validate: true}
 }
+
 ```
 
 ## Command Handler

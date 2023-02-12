@@ -17,16 +17,16 @@ var registeredQueries = &sync.Map{}
 func Register[T IQuery, K any](handler IQueryHandler[T, K]) error {
 	var query T
 
-	if _, ok := registeredQueries.Load(query.QueryName()); ok {
+	if _, ok := registeredQueries.Load(query.QueryConfig().Name); ok {
 		return ErrQueryAlreadyRegistered
 	}
 
-	registeredQueries.Store(query.QueryName(), handler)
+	registeredQueries.Store(query.QueryConfig().Name, handler)
 	return nil
 }
 
 func Handle[K any, T IQuery](ctx context.Context, query T) (value K, err error) {
-	handler, ok := registeredQueries.Load(query.QueryName())
+	handler, ok := registeredQueries.Load(query.QueryConfig().Name)
 	if !ok {
 		return value, ErrQueryNotRegistered
 	}
@@ -42,17 +42,36 @@ func Handle[K any, T IQuery](ctx context.Context, query T) (value K, err error) 
 		return value, ErrQueryHandlerType
 	}
 
-	err = Middleware.Sanitize(ctx, &query)
-	if err != nil {
-		return value, err
+	if query.QueryConfig().Sanitize {
+		err = Middleware.Sanitize(ctx, &query)
+		if err != nil {
+			return value, err
+		}
 	}
 
-	err = Middleware.Validate(query)
-	if err != nil {
-		return
+	if query.QueryConfig().Validate {
+		err = Middleware.Validate(query)
+		if err != nil {
+			return
+		}
 	}
 
 	value, err = typedHandler(ctx, query)
+
+	if query.QueryConfig().SanitizeResponse {
+		err = Middleware.Sanitize(ctx, &value)
+		if err != nil {
+			return value, err
+		}
+	}
+
+	if query.QueryConfig().SanitizeResponse {
+		err = Middleware.Validate(value)
+		if err != nil {
+			return
+		}
+	}
+
 	return
 }
 

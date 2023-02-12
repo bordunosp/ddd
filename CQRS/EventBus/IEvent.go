@@ -1,5 +1,5 @@
 package EventBus
 
 type IEvent interface {
-	EventName() string
+	EventConfig() EventConfig
 }
