@@ -1,10 +1,8 @@
 
 
-### DDD, CQRS, CommandBus, QueryBus, EventBus, DI  
+### DDD (Common part)  
 
 ---
-This repository contains a list of stubs for introducing a project in the CQRS and/or DDD paradigm. The icing on the cake is DI without reflection and code generation
-
 
 - [AggregateRoot](https://github.com/bordunosp/ddd/blob/main/docs/AggregateRoot.md) - is the parent "Entity" to all other Entities and Value Objects within the Aggregate. A Repository operates upon an Aggregate Root.
 - [Entity](https://github.com/bordunosp/ddd/blob/main/docs/Entity.md) - is something that has an identifier and an owner
