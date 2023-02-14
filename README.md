@@ -4,6 +4,12 @@
 
 ---
 
+```shell
+go get github.com/bordunosp/ddd@v0.0.23
+```
+
+---
+
 - [AggregateRoot](https://github.com/bordunosp/ddd/blob/main/docs/AggregateRoot.md) - is the parent "Entity" to all other Entities and Value Objects within the Aggregate. A Repository operates upon an Aggregate Root.
 - [Entity](https://github.com/bordunosp/ddd/blob/main/docs/Entity.md) - is something that has an identifier and an owner
 - [DI](https://github.com/bordunosp/ddd/blob/main/docs/DI.md) - (Dependency Injection) is a design pattern in which an object or function receives other objects or functions that it depends on
