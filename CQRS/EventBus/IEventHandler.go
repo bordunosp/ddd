@@ -2,4 +2,4 @@ package EventBus
 
 import "context"
 
-type IEventHandler[T IEvent] func(ctx context.Context, eventAny T) error
+type IEventHandler[T IEvent, Tx any] func(ctx context.Context, tx Tx, eventAny T) error

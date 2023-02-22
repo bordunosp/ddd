@@ -14,6 +14,7 @@ import (
 	"github.com/bordunosp/ddd/example/app/user/domain/event"
 	"github.com/bordunosp/ddd/example/app/user/infrastructure"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"log"
 	"os"
 )
@@ -56,13 +57,13 @@ func registerQueries() {
 }
 
 func registerEvents() {
-	err := EventBus.Register([]EventBus.IEventHandler[event.UserCreated]{
+	err := EventBus.Register([]EventBus.IEventHandler[event.UserCreated, *gorm.DB]{
 		Created.SaveLogHandler,
 		Created.SendEmailHandler,
 	})
 	Assertion.ErrorIsNull(err, "event.UserCreated register")
 
-	err = EventBus.Register([]EventBus.IEventHandler[event.UserUpdated]{
+	err = EventBus.Register([]EventBus.IEventHandler[event.UserUpdated, *gorm.DB]{
 		// event may not have handlers
 		//
 		// you never know when it might be really useful
@@ -103,7 +104,8 @@ func main() {
 	Assertion.ErrorIsNull(err, "CreateNew.Command handle")
 
 	// EventBus Handle
-	err = EventBus.Dispatch(ctx, event.UserCreated{
+	// must be called inside command with database transaction
+	err = EventBus.Dispatch(ctx, &gorm.DB{}, event.UserCreated{
 		Id:    uuid.New(),
 		Name:  "some eventDTO name",
 		Email: "some@event.email",

@@ -11,7 +11,7 @@ import (
 )
 
 type UserCreated struct {
-    Id    uuid.UUID
+    Id    string `mod:"trim" validate:"uuid"`
     Name  string `mod:"trim" validate:"required"`
     Email string `mod:"trim" validate:"required,email"`
 }
@@ -28,26 +28,29 @@ func (e UserCreated) EventConfig() EventBus.EventConfig {
 
 ## Event Handlers
 ###### src: app/user/application/event/user/Created/SendEmailHandler.go
+
 ```golang
 package Created
 
 import (
-    "context"
-    "github.com/bordunosp/ddd/DI"
-    "github.com/bordunosp/ddd/example/app/user/domain"
-    "github.com/bordunosp/ddd/example/app/user/domain/event"
-    "log"
+	"context"
+	"github.com/bordunosp/ddd/DI"
+	"github.com/bordunosp/ddd/example/app/user/domain"
+	"github.com/bordunosp/ddd/example/app/user/domain/event"
+	"gorm.io/gorm"
+	"log"
 )
 
 // For One event can be many handles
+// instead of a gorm transaction, there can be any other transaction
 
-func SendEmailHandler(ctx context.Context, event event.UserCreated) error {
+func SendEmailHandler(ctx context.Context, tx *gorm.DB, event event.UserCreated) error {
     // todo: send email
     log.Print("Print email from SendEmailHandler: ", event.Email)
     return nil
 }
 
-func SaveLogHandler(ctx context.Context, event event.UserCreated) error {
+func SaveLogHandler(ctx context.Context, tx *gorm.DB, event event.UserCreated) error {
     // todo: save logs
     log.Print("Print name from SaveLogHandler: ", event.Name)
     return nil
@@ -73,34 +76,36 @@ _ := user.AddDomainEvent(event)
 
 
 ## Event vs EventBus (Register)
+
 ```golang
 package main
 
 import (
-    "github.com/bordunosp/ddd/CQRS/EventBus"
-    "github.com/bordunosp/ddd/example/app/user/application/event/user/created"
-    "github.com/bordunosp/ddd/example/app/user/domain/event"
-    "log"
+	"github.com/bordunosp/ddd/CQRS/EventBus"
+	"github.com/bordunosp/ddd/example/app/user/application/event/user/created"
+	"github.com/bordunosp/ddd/example/app/user/domain/event"
+	"gorm.io/gorm"
+	"log"
 )
 
 func main() {
-    err := EventBus.Register([]EventBus.IEventHandler[event.UserCreated]{
-        Created.SaveLogHandler,
-        Created.SendEmailHandler,
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
+	err := EventBus.Register([]EventBus.IEventHandler[event.UserCreated, *gorm.DB]{
+		Created.SaveLogHandler,
+		Created.SendEmailHandler,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    err = EventBus.Register([]EventBus.IEventHandler[event.UserUpdated]{
-        // event may not have handlers
-        //
-        // you never know when it might be really useful
-        // that is why events are created long before handlers are created.
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
+	err = EventBus.Register([]EventBus.IEventHandler[event.UserUpdated, *gorm.DB]{
+		// event may not have handlers
+		//
+		// you never know when it might be really useful
+		// that is why events are created long before handlers are created.
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 ```
 
@@ -114,6 +119,7 @@ import (
 
 func main() {
     ctx := context.TODO()
+    tx := &gorm.DB{}
 	
     event = event.UserCreated{
         Id:    uuid.New(),
@@ -122,8 +128,8 @@ func main() {
     }
 	
     // choose 1 of 3 possible ways to execute handlers
-    _ = EventBus.Dispatch(ctx, event)
-    _ = EventBus.DispatchAsync(ctx, event)
-    _ = EventBus.DispatchAsyncAwait(ctx, event)
+    _ = EventBus.Dispatch(ctx, tx, event)
+    _ = EventBus.DispatchAsync(ctx, tx, event)
+    _ = EventBus.DispatchAsyncAwait(ctx, tx, event)
 }
 ```

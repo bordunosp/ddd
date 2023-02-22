@@ -13,7 +13,7 @@ var ErrEventHandlerType = errors.New("IEventHandler has incorrect type")
 
 var registeredEvents = &sync.Map{}
 
-func Register[T IEvent](handlers []IEventHandler[T]) error {
+func Register[T IEvent, Tx any](handlers []IEventHandler[T, Tx]) error {
 	var event T
 
 	if _, ok := registeredEvents.Load(event.EventConfig().Name); ok {
@@ -23,7 +23,7 @@ func Register[T IEvent](handlers []IEventHandler[T]) error {
 	return nil
 }
 
-func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
+func Dispatch[T IEvent, Tx any](ctx context.Context, tx Tx, event T) (err error) {
 	handlers, ok := registeredEvents.Load(event.EventConfig().Name)
 	if !ok {
 		return nil
@@ -35,7 +35,7 @@ func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
 		}
 	}()
 
-	typedHandlers, ok := handlers.([]IEventHandler[T])
+	typedHandlers, ok := handlers.([]IEventHandler[T, Tx])
 	if !ok {
 		return ErrEventHandlerType
 	}
@@ -55,7 +55,7 @@ func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
 	}
 
 	for _, handler := range typedHandlers {
-		err = handler(ctx, event)
+		err = handler(ctx, tx, event)
 		if err != nil {
 			return
 		}
@@ -64,17 +64,17 @@ func Dispatch[T IEvent](ctx context.Context, event T) (err error) {
 	return
 }
 
-func DispatchAsync[T IEvent](ctx context.Context, event T) chan error {
+func DispatchAsync[T IEvent, Tx any](ctx context.Context, tx Tx, event T) chan error {
 	c := make(chan error)
 
 	go func(ctx context.Context, event T) {
 		defer close(c)
-		c <- Dispatch[T](ctx, event)
+		c <- Dispatch[T](ctx, tx, event)
 	}(ctx, event)
 
 	return c
 }
 
-func DispatchAsyncAwait[T IEvent](ctx context.Context, event T) error {
-	return <-DispatchAsync[T](ctx, event)
+func DispatchAsyncAwait[T IEvent, Tx any](ctx context.Context, tx Tx, event T) error {
+	return <-DispatchAsync[T](ctx, tx, event)
 }
