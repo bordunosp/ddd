@@ -64,6 +64,12 @@ func Dispatch[T IEvent, Tx any](ctx context.Context, tx Tx, event T) (err error)
 	return
 }
 
+func DispatchOrPanic[T IEvent, Tx any](ctx context.Context, tx Tx, event T) {
+	if err := Dispatch[T, Tx](ctx, tx, event); err != nil {
+		panic(err)
+	}
+}
+
 func DispatchAsync[T IEvent, Tx any](ctx context.Context, tx Tx, event T) chan error {
 	c := make(chan error)
 
@@ -77,4 +83,10 @@ func DispatchAsync[T IEvent, Tx any](ctx context.Context, tx Tx, event T) chan e
 
 func DispatchAsyncAwait[T IEvent, Tx any](ctx context.Context, tx Tx, event T) error {
 	return <-DispatchAsync[T](ctx, tx, event)
+}
+
+func DispatchAsyncAwaitOrPanic[T IEvent, Tx any](ctx context.Context, tx Tx, event T) {
+	if err := DispatchAsyncAwait[T, Tx](ctx, tx, event); err != nil {
+		panic(err)
+	}
 }

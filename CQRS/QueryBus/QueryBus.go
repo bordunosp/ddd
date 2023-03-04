@@ -75,6 +75,15 @@ func Handle[K any, T IQuery](ctx context.Context, query T) (value K, err error) 
 	return
 }
 
+func HandleOrPanic[K any, T IQuery](ctx context.Context, query T) K {
+	val, err := Handle[K, T](ctx, query)
+	if err != nil {
+		panic(err)
+	}
+
+	return val
+}
+
 func HandleAsync[K any, T IQuery](ctx context.Context, query T) chan ReplayDTO[K] {
 	replay := make(chan ReplayDTO[K])
 
@@ -90,4 +99,13 @@ func HandleAsync[K any, T IQuery](ctx context.Context, query T) chan ReplayDTO[K
 func HandleAsyncAwait[K any, T IQuery](ctx context.Context, query T) (K, error) {
 	replay := <-HandleAsync[K, T](ctx, query)
 	return replay.Value, replay.Err
+}
+
+func HandleAsyncAwaitOrPanic[K any, T IQuery](ctx context.Context, query T) K {
+	val, err := HandleAsyncAwait[K, T](ctx, query)
+	if err != nil {
+		panic(err)
+	}
+
+	return val
 }

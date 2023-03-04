@@ -60,6 +60,12 @@ func Execute[T ICommand](ctx context.Context, command T) (err error) {
 	return
 }
 
+func ExecuteOrPanic[T ICommand](ctx context.Context, command T) {
+	if err := Execute[T](ctx, command); err != nil {
+		panic(err)
+	}
+}
+
 func ExecuteAsync[T ICommand](ctx context.Context, command T) chan error {
 	c := make(chan error)
 
@@ -73,4 +79,10 @@ func ExecuteAsync[T ICommand](ctx context.Context, command T) chan error {
 
 func ExecuteAsyncAwait[T ICommand](ctx context.Context, command T) error {
 	return <-ExecuteAsync[T](ctx, command)
+}
+
+func ExecuteAsyncAwaitOrPanic[T ICommand](ctx context.Context, command T) {
+	if err := ExecuteAsyncAwait[T](ctx, command); err != nil {
+		panic(err)
+	}
 }

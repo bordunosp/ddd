@@ -17,7 +17,7 @@ type userService struct {
 	logger *log.Logger
 }
 
-func (u *userService) SendCreatedEmail(cnt context.Context, userId uuid.UUID) error {
+func (u *userService) SendCreatedEmail(ctx context.Context, userId uuid.UUID) error {
 	//TODO implement me
 	u.logger.Println("SendCreatedEmail called with userId: " + userId.String())
 	return nil
