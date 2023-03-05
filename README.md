@@ -5,7 +5,7 @@
 ---
 
 ```shell
-go get github.com/bordunosp/ddd@v0.0.26
+go get github.com/bordunosp/ddd@v0.0.27
 ```
 
 ---

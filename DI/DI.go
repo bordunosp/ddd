@@ -41,6 +41,15 @@ func Get[T any](serviceName string) (T, error) {
 	return convertableType, nil
 }
 
+func GetOrPanic[T any](serviceName string) T {
+	service, err := Get[T](serviceName)
+	if err != nil {
+		panic(err)
+	}
+
+	return service
+}
+
 func RegisterServices(services []ServiceItem) error {
 	for _, service := range services {
 		if _, ok := registeredServices.Load(service.ServiceName); ok {
