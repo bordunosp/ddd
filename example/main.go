@@ -34,7 +34,7 @@ func registerDI() {
 			IsSingleton: false,
 			ServiceName: "UserService",
 			ServiceInitFunc: func() (any, error) {
-				logger, err := DI.Get[*log.Logger]("logger")
+				logger, err := DI.GetByName[*log.Logger]("logger")
 				if err != nil {
 					return nil, err
 				}
@@ -84,7 +84,7 @@ func main() {
 
 	// Use service from DI
 	// it can be used anywhere in your project (after registered)
-	logger, _ := DI.Get[*log.Logger]("logger")
+	logger := DI.GetOrPanic[*log.Logger]()
 	logger.Println("logger.Println called")
 
 	// QueryBus Handle

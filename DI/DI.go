@@ -11,7 +11,32 @@ var ErrServiceAlreadyRegistered = errors.New("service already registered")
 
 var registeredServices = &sync.Map{}
 
-func Get[T any](serviceName string) (T, error) {
+func Get[T any]() (T, error) {
+	var serviceT T
+	err := ErrServiceNotRegistered
+
+	registeredServices.Range(func(_, value any) bool {
+		if serviceTT, ok := value.(T); ok {
+			serviceT = serviceTT
+			err = nil
+			return true
+		}
+		return true
+	})
+
+	return serviceT, err
+}
+
+func GetOrPanic[T any]() T {
+	service, err := Get[T]()
+	if err != nil {
+		panic(err)
+	}
+
+	return service
+}
+
+func GetByName[T any](serviceName string) (T, error) {
 	var serviceT T
 
 	service, ok := registeredServices.Load(serviceName)
@@ -41,8 +66,8 @@ func Get[T any](serviceName string) (T, error) {
 	return convertableType, nil
 }
 
-func GetOrPanic[T any](serviceName string) T {
-	service, err := Get[T](serviceName)
+func GetByNameOrPanic[T any](serviceName string) T {
+	service, err := GetByName[T](serviceName)
 	if err != nil {
 		panic(err)
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 func SendEmailHandler(ctx context.Context, tx *gorm.DB, event event.UserCreated) error {
-	userService, err := DI.Get[domain.IUserService]("UserService")
+	userService, err := DI.Get[domain.IUserService]()
 	if err != nil {
 		return err
 	}
