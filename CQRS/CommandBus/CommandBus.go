@@ -11,7 +11,10 @@ import (
 var ErrCommandAlreadyRegistered = errors.New("command already registered")
 var ErrCommandNotRegistered = errors.New("command not registered")
 var ErrCommandHandlerType = errors.New("ICommandHandler has incorrect type")
+var ErrCommandMiddlewareType = errors.New("ICommandHandler has incorrect type")
 
+var middlewares []any
+var middlewaresMutex sync.Mutex
 var registeredCommands = &sync.Map{}
 
 func Register[T ICommand](handler ICommandHandler[T]) error {
@@ -23,6 +26,13 @@ func Register[T ICommand](handler ICommandHandler[T]) error {
 
 	registeredCommands.Store(command.CommandConfig().Name, handler)
 	return nil
+}
+
+func RegisterMiddleware[T ICommand](middleware ICommandMiddleWare[T]) {
+	middlewaresMutex.Lock()
+	defer middlewaresMutex.Unlock()
+
+	middlewares = append(middlewares, middleware)
 }
 
 func Execute[T ICommand](ctx context.Context, command T) (err error) {
@@ -54,6 +64,15 @@ func Execute[T ICommand](ctx context.Context, command T) (err error) {
 		if err != nil {
 			return
 		}
+	}
+
+	for _, middleware := range middlewares {
+		typedMiddleware, ok := middleware.(func(handler ICommandHandler[T]) ICommandHandler[T])
+		if !ok {
+			return ErrCommandMiddlewareType
+		}
+
+		typedHandler = typedMiddleware(typedHandler)
 	}
 
 	err = typedHandler(ctx, command)
