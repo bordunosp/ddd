@@ -11,7 +11,7 @@ import (
 var ErrCommandAlreadyRegistered = errors.New("command already registered")
 var ErrCommandNotRegistered = errors.New("command not registered")
 var ErrCommandHandlerType = errors.New("ICommandHandler has incorrect type")
-var ErrCommandMiddlewareType = errors.New("ICommandHandler has incorrect type")
+var ErrCommandMiddlewareType = errors.New("MiddlewareType has incorrect type")
 
 var middlewares []any
 var middlewaresMutex sync.Mutex
