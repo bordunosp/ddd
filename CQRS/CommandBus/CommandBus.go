@@ -67,7 +67,7 @@ func Execute[T ICommand](ctx context.Context, command T) (err error) {
 	}
 
 	for _, middleware := range middlewares {
-		typedMiddleware, ok := middleware.(ICommandMiddleWare[T])
+		typedMiddleware, ok := middleware.(func(handler ICommandHandler[T]) ICommandHandler[T])
 		if !ok {
 			return ErrCommandMiddlewareType
 		}
