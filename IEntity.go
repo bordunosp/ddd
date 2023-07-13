@@ -7,5 +7,4 @@ type IEntity interface {
 	UUID() uuid.UUID
 	AggregateID() string
 	AggregateUUID() uuid.UUID
-	IsEqual(other IEntity) bool
 }

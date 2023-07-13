@@ -5,7 +5,7 @@
 ---
 
 ```shell
-go get github.com/bordunosp/ddd@v0.0.33
+go get github.com/bordunosp/ddd@v0.0.34
 ```
 
 ---
@@ -19,3 +19,4 @@ go get github.com/bordunosp/ddd@v0.0.33
 - [Assertion](https://github.com/bordunosp/ddd/blob/main/docs/Assertion.md) - is a list of functions for more readable error checking
 - [Sanitizer](https://github.com/bordunosp/ddd/blob/main/docs/Sanitizer.md) - way of sanitize (command, query, event) DTO
 - [Validator](https://github.com/bordunosp/ddd/blob/main/docs/Validator.md) - way of validate (command, query, event) DTO
+- [Saga](https://github.com/bordunosp/ddd/blob/main/docs/Saga.md) - The Saga architecture pattern provides transaction management using a sequence of local transactions

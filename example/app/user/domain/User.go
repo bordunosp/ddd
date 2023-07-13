@@ -27,11 +27,6 @@ type user struct {
 	email string
 }
 
-func (u *user) IsEqual(other ddd.IAggregateRoot) bool {
-	otherObj, ok := other.(User)
-	return ok && u.ID() == otherObj.ID()
-}
-
 func (u *user) Name() string {
 	return u.name
 }

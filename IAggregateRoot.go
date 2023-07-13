@@ -11,6 +11,4 @@ type IAggregateRoot interface {
 	DomainEvents() []EventBus.IEvent
 	DomainEventsAdd(event EventBus.IEvent)
 	DomainEventsClear()
-
-	IsEqual(other IAggregateRoot) bool
 }
